@@ -1,3 +1,4 @@
+//此文件定义了 学生类和一些基础函数
 #pragma once
 #include <string>
 

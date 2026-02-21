@@ -4,9 +4,11 @@ project(StudentManagementSystem)
 set(CMAKE_CXX_STANDARD 23)
 
 add_executable(StudentManagementSystem
-        src/main.cpp
-        src/Student.h
-        src/Student.cpp
-        src/Print_util.h
-        src/CmdHandelr.cpp
-        src/CmdHandelr.h)
+        src/obj/main.cpp
+        src/Head/Student.h
+        src/obj/Student.cpp
+        src/Head/Print_util.h
+        src/obj/CmdHandler.cpp
+        src/Head/CmdHandler.h
+        src/obj/Studentstore.cpp
+        src/Head/Studentstore.h)

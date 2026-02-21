@@ -1,5 +1,10 @@
+//此文件夹用于重构 << 操作符号
+//可以使用此文件直接打印类的所有成员。
+
 #pragma once
+#include <iostream>
 #include <map>
+#include <unordered_map>
 
 // 适用于 sequence 容器
 template <typename Container>
