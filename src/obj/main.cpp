@@ -21,9 +21,19 @@ void test01()
     });
 }
 
+void test02()
+{
+    std::string arg = {};
+    Student_Store test_store;
+    while (getline(std::cin, arg))
+    {
+        CmdHandler::execute(arg);
+    }
+}
+
 int main()
 {
     init();
-    test01();
+    test02();
     return 0;
 }

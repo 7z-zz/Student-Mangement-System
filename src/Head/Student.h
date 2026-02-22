@@ -5,6 +5,7 @@
 class Student
 {
     public:
+        Student();
         Student(std::string major, std::string name, std::string no);
 
     [[nodiscard]] const std::string& Get_major() const;
