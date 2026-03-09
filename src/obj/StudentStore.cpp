@@ -1,4 +1,3 @@
-#pragma once
 #include "../Head/StudentStore.h"
 #include <ranges>
 

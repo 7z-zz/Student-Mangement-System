@@ -137,7 +137,7 @@ void CmdHandler::LIST(const std::vector<std::string>& tokens)
     int count = 0;
     g_store.forEach([&](const Student& s) {
         // ✅ 这里根据你的 Student getter 来改：
-        // 假设有 Get_studentNo / Get_name / Get_major
+        // 使用当前 Student 接口：Get_studentNo / Get_studentName / Get_major
         std::cout << "专业：" << s.Get_major() << "\t"
                   << "名字：" << s.Get_studentName() << "\t"
                   << "学号：" <<s.Get_studentNo() << "\n";

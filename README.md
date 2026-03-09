@@ -1,3 +1,3 @@
 # Student-Management-System
-This is my first cpp project: Student management system
-in this system we will use postgresql store the data
+This is my first C++ project: Student Management System.
+In this system, we use PostgreSQL to store the data.
