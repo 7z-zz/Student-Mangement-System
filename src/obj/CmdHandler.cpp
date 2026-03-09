@@ -4,10 +4,8 @@
 #include <algorithm>
 #include <cctype>
 #include <iostream>
-#include <stdexcept>
 
 // 作为“内存版数据库”
-// 后续你接 PostgreSQL，可以把 Student_Store 改成 DBStore，CmdHandler 不用大改
 static Student_Store g_store;
 
 // 小工具：转小写（用于命令不区分大小写）
@@ -70,16 +68,13 @@ std::vector<std::string> CmdHandler::tokenize(const std::string& line)
     std::string cur;
     bool in_quotes = false;
 
-    for (size_t i = 0; i < line.size(); ++i)
+    for (char ch : line)
     {
-        char ch = line[i];
-
         if (ch == '"')
         {
             in_quotes = !in_quotes;
             continue;
         }
-
         if (!in_quotes && std::isspace(static_cast<unsigned char>(ch)))
         {
             if (!cur.empty())
@@ -124,8 +119,7 @@ void CmdHandler::ADD(const std::vector<std::string>& tokens)
     // s.Set_name(name);
     // s.Set_studentNo(no);
 
-    const bool ok = g_store.add(s);
-    if (ok)
+    if (g_store.add(s))
         std::cout << "[OK] added: " << no << " " << name << " (" << major << ")\n";
     else
         std::cout << "[FAIL] student_no already exists: " << no << "\n";
