@@ -1,9 +1,13 @@
 # =========================
 # IDE config
 # =========================
+<<<<<<< HEAD
 #Data
 src/Data
 .venv/
+=======
+
+>>>>>>> c09f5c2f6ed22ba183a716f073668e5239cd7db1
 # CLion / IntelliJ
 .idea/
 
