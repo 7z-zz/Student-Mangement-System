@@ -34,10 +34,15 @@ void test02()
         CmdHandler::execute(arg);
     }
 }
+void test03()
+{
+    std::cout << "fuch world" << std::endl;
+}
 
 int main()
 {
     init();
     test02();
+    test03();
     return 0;
 }
