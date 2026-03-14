@@ -36,7 +36,7 @@ void test02()
 }
 void test03()
 {
-    std::cout << "fuch world" << std::endl;
+    std::cout << "fuck world" << std::endl;
 }
 
 int main()

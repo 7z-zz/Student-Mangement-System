@@ -1,0 +1,53 @@
+# =========================
+# IDE config
+# =========================
+
+# CLion / IntelliJ
+.idea/
+
+# VS Code local config
+.vscode/
+
+# =========================
+# Build directories
+# =========================
+
+build/
+cmake-build-debug/
+cmake-build-release/
+
+# =========================
+# CMake generated files
+# =========================
+
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+compile_commands.json
+build.ninja
+.ninja_deps
+.ninja_log
+
+# =========================
+# Binary / object / debug files
+# =========================
+
+*.exe
+*.out
+*.obj
+*.o
+*.a
+*.lib
+*.dll
+*.so
+*.dylib
+*.pdb
+*.ilk
+
+# =========================
+# OS / misc
+# =========================
+
+.DS_Store
+Thumbs.db
