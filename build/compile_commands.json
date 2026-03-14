@@ -1,0 +1,26 @@
+[
+{
+  "directory": "Z:/CLion_C++/StudentManagementSystem/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -g -std=gnu++23 -o CMakeFiles\\StudentManagementSystem.dir\\src\\obj\\main.cpp.obj -c Z:\\CLion_C++\\StudentManagementSystem\\src\\obj\\main.cpp",
+  "file": "Z:/CLion_C++/StudentManagementSystem/src/obj/main.cpp",
+  "output": "Z:/CLion_C++/StudentManagementSystem/build/CMakeFiles/StudentManagementSystem.dir/src/obj/main.cpp.obj"
+},
+{
+  "directory": "Z:/CLion_C++/StudentManagementSystem/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -g -std=gnu++23 -o CMakeFiles\\StudentManagementSystem.dir\\src\\obj\\Student.cpp.obj -c Z:\\CLion_C++\\StudentManagementSystem\\src\\obj\\Student.cpp",
+  "file": "Z:/CLion_C++/StudentManagementSystem/src/obj/Student.cpp",
+  "output": "Z:/CLion_C++/StudentManagementSystem/build/CMakeFiles/StudentManagementSystem.dir/src/obj/Student.cpp.obj"
+},
+{
+  "directory": "Z:/CLion_C++/StudentManagementSystem/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -g -std=gnu++23 -o CMakeFiles\\StudentManagementSystem.dir\\src\\obj\\CmdHandler.cpp.obj -c Z:\\CLion_C++\\StudentManagementSystem\\src\\obj\\CmdHandler.cpp",
+  "file": "Z:/CLion_C++/StudentManagementSystem/src/obj/CmdHandler.cpp",
+  "output": "Z:/CLion_C++/StudentManagementSystem/build/CMakeFiles/StudentManagementSystem.dir/src/obj/CmdHandler.cpp.obj"
+},
+{
+  "directory": "Z:/CLion_C++/StudentManagementSystem/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -g -std=gnu++23 -o CMakeFiles\\StudentManagementSystem.dir\\src\\obj\\StudentStore.cpp.obj -c Z:\\CLion_C++\\StudentManagementSystem\\src\\obj\\StudentStore.cpp",
+  "file": "Z:/CLion_C++/StudentManagementSystem/src/obj/StudentStore.cpp",
+  "output": "Z:/CLion_C++/StudentManagementSystem/build/CMakeFiles/StudentManagementSystem.dir/src/obj/StudentStore.cpp.obj"
+}
+]

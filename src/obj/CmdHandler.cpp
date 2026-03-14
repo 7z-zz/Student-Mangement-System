@@ -5,44 +5,39 @@
 #include <cctype>
 #include <iostream>
 
-// 作为“内存版数据库”
 static Student_Store g_store;
 
-// 小工具：转小写（用于命令不区分大小写）
 static std::string toLower(std::string s)
 {
     std::ranges::transform(s.begin(), s.end(), s.begin(),
-                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+                           [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
     return s;
 }
 
 void CmdHandler::execute(const std::string& line)
 {
     auto tokens = tokenize(line);
-    if (tokens.empty()) return;
+    if (tokens.empty())
+    {
+        return;
+    }
 
-    // 例：sms add ... / sms list
-    // 你注释里写的是 sms add <major> <name> <student_no>
-    // 所以 tokens[0] 应该是 "sms"
     const std::string app = toLower(tokens[0]);
     if (app != "sms")
     {
         std::cout << "Unknown app command: " << tokens[0] << "\n";
-        std::cout << "Usage: sms add <major> <name> <student_no>\n";
-        std::cout << "       sms list\n";
+        std::cout << "Type: sms help\n";
         return;
     }
 
     if (tokens.size() == 1)
     {
         std::cout << "Missing subcommand.\n";
-        std::cout << "Usage: sms add <major> <name> <student_no>\n";
-        std::cout << "       sms list\n";
+        std::cout << "Type: sms help\n";
         return;
     }
 
     const std::string sub = toLower(tokens[1]);
-
     if (sub == "add")
     {
         ADD(tokens);
@@ -50,6 +45,18 @@ void CmdHandler::execute(const std::string& line)
     else if (sub == "list")
     {
         LIST(tokens);
+    }
+    else if (sub == "get")
+    {
+        GET(tokens);
+    }
+    else if (sub == "del")
+    {
+        DEL(tokens);
+    }
+    else if (sub == "update")
+    {
+        UPDATE(tokens);
     }
     else if (sub == "help")
     {
@@ -75,6 +82,7 @@ std::vector<std::string> CmdHandler::tokenize(const std::string& line)
             in_quotes = !in_quotes;
             continue;
         }
+
         if (!in_quotes && std::isspace(static_cast<unsigned char>(ch)))
         {
             if (!cur.empty())
@@ -89,15 +97,15 @@ std::vector<std::string> CmdHandler::tokenize(const std::string& line)
     }
 
     if (!cur.empty())
+    {
         out.push_back(cur);
+    }
 
     return out;
 }
 
-// sms add <major> <name> <student_no>
 void CmdHandler::ADD(const std::vector<std::string>& tokens)
 {
-    // tokens: [0]=sms [1]=add [2]=major [3]=name [4]=student_no
     if (tokens.size() != 5)
     {
         std::cout << "Usage: sms add <major> <name> <student_no>\n";
@@ -106,26 +114,19 @@ void CmdHandler::ADD(const std::vector<std::string>& tokens)
     }
 
     const std::string& major = tokens[2];
-    const std::string& name  = tokens[3];
-    const std::string& no    = tokens[4];
+    const std::string& name = tokens[3];
+    const std::string& no = tokens[4];
 
-    // ✅ 这里根据你的 Student 类来改：
-    // 方案A：如果你有构造函数 Student(major, name, no)
-    Student s(major, name, no);
-
-    // 方案B：如果你没有构造函数，而是 setter，就改成类似：
-    // Student s;
-    // s.Set_major(major);
-    // s.Set_name(name);
-    // s.Set_studentNo(no);
-
-    if (g_store.add(s))
+    if (g_store.add(Student(major, name, no)))
+    {
         std::cout << "[OK] added: " << no << " " << name << " (" << major << ")\n";
+    }
     else
+    {
         std::cout << "[FAIL] student_no already exists: " << no << "\n";
+    }
 }
 
-// sms list
 void CmdHandler::LIST(const std::vector<std::string>& tokens)
 {
     if (tokens.size() != 2)
@@ -134,24 +135,93 @@ void CmdHandler::LIST(const std::vector<std::string>& tokens)
         return;
     }
 
-    int count = 0;
-    g_store.forEach([&](const Student& s) {
-        // ✅ 这里根据你的 Student getter 来改：
-        // 使用当前 Student 接口：Get_studentNo / Get_studentName / Get_major
-        std::cout << "专业：" << s.Get_major() << "\t"
-                  << "名字：" << s.Get_studentName() << "\t"
-                  << "学号：" <<s.Get_studentNo() << "\n";
-        ++count;
+    if (g_store.size() == 0)
+    {
+        std::cout << "(empty)\n";
+        return;
+    }
+
+    g_store.forEach([](const Student& s)
+    {
+        std::cout << "major: " << s.Get_major() << "\t"
+                  << "name: " << s.Get_studentName() << "\t"
+                  << "student_no: " << s.Get_studentNo() << "\n";
     });
 
-    std::cout << "Total: " << count << "\n";
+    std::cout << "Total: " << g_store.size() << "\n";
 }
 
-//sms help
+void CmdHandler::GET(const std::vector<std::string>& tokens)
+{
+    if (tokens.size() != 3)
+    {
+        std::cout << "Usage: sms get <student_no>\n";
+        return;
+    }
+
+    const std::string& no = tokens[2];
+    const Student* s = g_store.find(no);
+    if (!s)
+    {
+        std::cout << "[FAIL] not found: " << no << "\n";
+        return;
+    }
+
+    std::cout << "major: " << s->Get_major() << "\t"
+              << "name: " << s->Get_studentName() << "\t"
+              << "student_no: " << s->Get_studentNo() << "\n";
+}
+
+void CmdHandler::DEL(const std::vector<std::string>& tokens)
+{
+    if (tokens.size() != 3)
+    {
+        std::cout << "Usage: sms del <student_no>\n";
+        return;
+    }
+
+    const std::string& no = tokens[2];
+    if (g_store.remove(no))
+    {
+        std::cout << "[OK] deleted: " << no << "\n";
+    }
+    else
+    {
+        std::cout << "[FAIL] not found: " << no << "\n";
+    }
+}
+
+void CmdHandler::UPDATE(const std::vector<std::string>& tokens)
+{
+    if (tokens.size() != 5)
+    {
+        std::cout << "Usage: sms update <student_no> <major> <name>\n";
+        std::cout << "Example: sms update 20260001 AI \"Li Si\"\n";
+        return;
+    }
+
+    const std::string& no = tokens[2];
+    const std::string& major = tokens[3];
+    const std::string& name = tokens[4];
+
+    if (g_store.update(no, major, name))
+    {
+        std::cout << "[OK] updated: " << no << " -> " << name << " (" << major << ")\n";
+    }
+    else
+    {
+        std::cout << "[FAIL] not found: " << no << "\n";
+    }
+}
+
 void CmdHandler::HELP()
 {
     std::cout << "Commands:\n";
     std::cout << "  sms add <major> <name> <student_no>\n";
     std::cout << "  sms list\n";
+    std::cout << "  sms get <student_no>\n";
+    std::cout << "  sms del <student_no>\n";
+    std::cout << "  sms update <student_no> <major> <name>\n";
+    std::cout << "  sms help\n";
     std::cout << "Tip: if name contains spaces, wrap with quotes: \"Zhang San\"\n";
 }

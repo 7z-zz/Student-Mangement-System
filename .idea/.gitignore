@@ -8,3 +8,32 @@
 /dataSources.local.xml
 # 基于编辑器的 HTTP 客户端请求
 /httpRequests/
+# VS Code local config
+.vscode/launch.json
+.vscode/settings.json
+.vscode/tasks.json
+
+# CMake build dirs
+build/
+cmake-build-debug/
+cmake-build-release/
+out/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+compile_commands.json
+build.ninja
+.ninja_deps
+.ninja_log
+
+# Binary / object files
+*.exe
+*.obj
+*.o
+*.dll
+*.a
+*.lib
+*.pdb
