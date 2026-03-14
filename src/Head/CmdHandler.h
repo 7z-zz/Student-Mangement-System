@@ -17,4 +17,5 @@ private:
     static void DEL(const std::vector<std::string>& tokens);       // sms del <student_no>
     static void UPDATE(const std::vector<std::string>& tokens);    // sms update <student_no> <major> <name>
     static void HELP();
+    static bool ensureDbReady();
 };

@@ -1,59 +1,24 @@
-# Student Management System (CLI)
+# Student Management System (CLI + PostgreSQL)
 
-一个基于 C++ 的命令行学生信息管理系统，支持基础增删改查（CRUD）。
+基于 C++ 的命令行学生管理系统，当前版本使用 PostgreSQL 持久化数据，支持通过 `sms` 命令进行增删改查。
 
-## 功能概览
+## 功能
 
-- `add`：新增学生
-- `list`：查看所有学生
-- `get`：按学号查询学生
-- `del`：按学号删除学生
-- `update`：按学号更新学生专业与姓名
-- `help`：查看帮助
+- `sms add <major> <name> <student_no>`：新增学生
+- `sms list`：列出全部学生
+- `sms get <student_no>`：按学号查询
+- `sms del <student_no>`：按学号删除
+- `sms update <student_no> <major> <name>`：按学号更新专业和姓名
+- `sms help`：查看帮助
 
-当前版本使用内存存储，程序退出后数据不会持久化。
+## 数据库说明
 
-## 数据字段
-
-- `major`：专业
-- `name`：姓名
-- `student_no`：学号（唯一键）
-
-## 命令格式
-
-统一前缀：`sms`
-
-```text
-sms add <major> <name> <student_no>
-sms list
-sms get <student_no>
-sms del <student_no>
-sms update <student_no> <major> <name>
-sms help
-```
-
-如果姓名里有空格，请使用双引号：
-
-```text
-sms add CS "Zhang San" 20260001
-sms update 20260001 AI "Li Si"
-```
-
-## 使用示例
-
-```text
-sms add CS "Zhang San" 20260001
-sms add Math WangWu 20260002
-sms list
-sms get 20260001
-sms update 20260001 AI "Li Si"
-sms del 20260002
-sms help
-```
+- 使用 PostgreSQL 客户端 `libpq`。
+- 程序首次执行命令时会自动连接数据库，并自动建表（若不存在）：
+  - 表名：`sms_test04`
+  - 字段：`student_no`（主键）、`major`、`name`
 
 ## 构建与运行
-
-在项目根目录执行：
 
 ```bash
 cmake -S . -B build
@@ -61,7 +26,7 @@ cmake --build build
 ./build/StudentManagementSystem
 ```
 
-Windows PowerShell 可执行：
+Windows PowerShell：
 
 ```powershell
 cmake -S . -B build
@@ -69,23 +34,24 @@ cmake --build build
 .\build\StudentManagementSystem.exe
 ```
 
-启动后可持续输入命令，按 `Ctrl + C` 退出。
+## 命令示例
 
-## 目录结构（核心）
+```text
+sms help
+sms add CS "Zhang San" 20260001
+sms get 20260001
+sms update 20260001 AI "Li Si"
+sms list
+sms del 20260001
+```
 
-- `src/obj/main.cpp`：程序入口，读取命令并分发
-- `src/obj/CmdHandler.cpp`：命令解析与执行
-- `src/obj/StudentStore.cpp`：学生数据存储与 CRUD
-- `src/obj/Student.cpp`：学生对象定义
+## 项目结构（核心）
 
-## 已知限制
+- `src/obj/main.cpp`：程序入口，命令行循环
+- `src/obj/CmdHandler.cpp`：命令解析与数据库操作调度
+- `src/obj/DatabaseOps.cpp`：PostgreSQL 数据库读写实现
+- `src/Head/Student.h`：学生实体定义
 
-- 数据仅保存在内存中，重启程序会丢失。
-- 当前没有学号格式校验（只要求唯一）。
-- `list` 输出顺序由 `unordered_map` 决定，不保证固定顺序。
+## 说明
 
-## 后续建议
-
-- 增加文件持久化（CSV / JSON / SQLite）。
-- 增加按姓名、专业筛选查询。
-- 增加输入校验与更详细的错误提示。
+- `src/data/students.json` 已可用于数据库导入测试（通过 `DatabaseOps::importStudentsFromJsonFile`），当前尚未提供独立命令（如 `sms import`）。

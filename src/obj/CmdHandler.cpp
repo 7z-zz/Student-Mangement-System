@@ -1,17 +1,79 @@
 #include "../Head/CmdHandler.h"
-#include "../Head/StudentStore.h"
+
+#include "../Head/DatabaseOps.h"
 
 #include <algorithm>
 #include <cctype>
 #include <iostream>
 
-static Student_Store g_store;
-
-static std::string toLower(std::string s)
+namespace
 {
-    std::ranges::transform(s.begin(), s.end(), s.begin(),
-                           [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    return s;
+    PGconn* g_conn = nullptr;
+    void ignoreNotice(void*, const char*) {}
+
+    std::string toLower(std::string s)
+    {
+        std::ranges::transform(s.begin(), s.end(), s.begin(),
+                               [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        return s;
+    }
+
+    std::string buildConnInfo()
+    {
+        const char* conninfo_env = std::getenv("PG_CONNINFO");
+        if (conninfo_env && *conninfo_env)
+        {
+            return conninfo_env;
+        }
+        return "host=127.0.0.1 port=5432 dbname=my_postgresqldb user=sku7z password=sku7z";
+    }
+
+    void stripUtf8Bom(std::string& s)
+    {
+        if (s.size() >= 3 &&
+            static_cast<unsigned char>(s[0]) == 0xEF &&
+            static_cast<unsigned char>(s[1]) == 0xBB &&
+            static_cast<unsigned char>(s[2]) == 0xBF)
+        {
+            s.erase(0, 3);
+        }
+
+        while (!s.empty() && !std::isalpha(static_cast<unsigned char>(s.front())))
+        {
+            s.erase(s.begin());
+        }
+    }
+}
+
+bool CmdHandler::ensureDbReady()
+{
+    if (g_conn && PQstatus(g_conn) == CONNECTION_OK)
+    {
+        return true;
+    }
+
+    if (g_conn)
+    {
+        DatabaseOps::disconnect(g_conn);
+        g_conn = nullptr;
+    }
+
+    g_conn = DatabaseOps::connect(buildConnInfo());
+    if (!g_conn)
+    {
+        std::cout << "[FAIL] database connection failed.\n";
+        return false;
+    }
+    PQsetNoticeProcessor(g_conn, ignoreNotice, nullptr);
+    PQexec(g_conn, "SET client_min_messages TO warning;");
+
+    if (!DatabaseOps::ensureStudentTable(g_conn))
+    {
+        std::cout << "[FAIL] failed to prepare student table.\n";
+        return false;
+    }
+
+    return true;
 }
 
 void CmdHandler::execute(const std::string& line)
@@ -22,6 +84,7 @@ void CmdHandler::execute(const std::string& line)
         return;
     }
 
+    stripUtf8Bom(tokens[0]);
     const std::string app = toLower(tokens[0]);
     if (app != "sms")
     {
@@ -38,6 +101,17 @@ void CmdHandler::execute(const std::string& line)
     }
 
     const std::string sub = toLower(tokens[1]);
+    if (sub == "help")
+    {
+        HELP();
+        return;
+    }
+
+    if (!ensureDbReady())
+    {
+        return;
+    }
+
     if (sub == "add")
     {
         ADD(tokens);
@@ -57,10 +131,6 @@ void CmdHandler::execute(const std::string& line)
     else if (sub == "update")
     {
         UPDATE(tokens);
-    }
-    else if (sub == "help")
-    {
-        HELP();
     }
     else
     {
@@ -117,13 +187,13 @@ void CmdHandler::ADD(const std::vector<std::string>& tokens)
     const std::string& name = tokens[3];
     const std::string& no = tokens[4];
 
-    if (g_store.add(Student(major, name, no)))
+    if (DatabaseOps::insertStudent(g_conn, Student(major, name, no)))
     {
         std::cout << "[OK] added: " << no << " " << name << " (" << major << ")\n";
     }
     else
     {
-        std::cout << "[FAIL] student_no already exists: " << no << "\n";
+        std::cout << "[FAIL] student_no already exists or SQL failed: " << no << "\n";
     }
 }
 
@@ -135,20 +205,20 @@ void CmdHandler::LIST(const std::vector<std::string>& tokens)
         return;
     }
 
-    if (g_store.size() == 0)
+    const auto students = DatabaseOps::queryAllStudents(g_conn);
+    if (students.empty())
     {
         std::cout << "(empty)\n";
         return;
     }
 
-    g_store.forEach([](const Student& s)
+    for (const auto& s : students)
     {
         std::cout << "major: " << s.Get_major() << "\t"
                   << "name: " << s.Get_studentName() << "\t"
                   << "student_no: " << s.Get_studentNo() << "\n";
-    });
-
-    std::cout << "Total: " << g_store.size() << "\n";
+    }
+    std::cout << "Total: " << students.size() << "\n";
 }
 
 void CmdHandler::GET(const std::vector<std::string>& tokens)
@@ -160,16 +230,16 @@ void CmdHandler::GET(const std::vector<std::string>& tokens)
     }
 
     const std::string& no = tokens[2];
-    const Student* s = g_store.find(no);
-    if (!s)
+    Student student("", "", "");
+    if (!DatabaseOps::queryStudentByNo(g_conn, no, student))
     {
         std::cout << "[FAIL] not found: " << no << "\n";
         return;
     }
 
-    std::cout << "major: " << s->Get_major() << "\t"
-              << "name: " << s->Get_studentName() << "\t"
-              << "student_no: " << s->Get_studentNo() << "\n";
+    std::cout << "major: " << student.Get_major() << "\t"
+              << "name: " << student.Get_studentName() << "\t"
+              << "student_no: " << student.Get_studentNo() << "\n";
 }
 
 void CmdHandler::DEL(const std::vector<std::string>& tokens)
@@ -181,7 +251,7 @@ void CmdHandler::DEL(const std::vector<std::string>& tokens)
     }
 
     const std::string& no = tokens[2];
-    if (g_store.remove(no))
+    if (DatabaseOps::deleteStudentByNo(g_conn, no))
     {
         std::cout << "[OK] deleted: " << no << "\n";
     }
@@ -204,7 +274,7 @@ void CmdHandler::UPDATE(const std::vector<std::string>& tokens)
     const std::string& major = tokens[3];
     const std::string& name = tokens[4];
 
-    if (g_store.update(no, major, name))
+    if (DatabaseOps::updateStudentByNo(g_conn, Student(major, name, no)))
     {
         std::cout << "[OK] updated: " << no << " -> " << name << " (" << major << ")\n";
     }
